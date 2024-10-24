@@ -59,6 +59,7 @@ export async function getAllGrades(where?: GradeSelect) {
     return result;
   } catch (error) {
     console.log(error);
+    return [];
   }
 }
 export async function getAllGradesWithTrash(where?: GradeSelect) {
@@ -68,6 +69,7 @@ export async function getAllGradesWithTrash(where?: GradeSelect) {
     const result = await prisma.grade.findMany({ where: { year, ...where } });
     return result;
   } catch (error) {
+    return [];
     console.log(error);
   }
 }

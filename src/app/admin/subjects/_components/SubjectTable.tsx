@@ -62,7 +62,7 @@ export default function SubjectTable({ subjects }: { subjects: Subject[] }) {
                   </>
                 ) : (
                   <Button onClick={() => handleDelete(subject.id)} size="sm" variant="destructive">
-                    Eliminar
+                    Deshabilitar
                   </Button>
                 )}
               </div>

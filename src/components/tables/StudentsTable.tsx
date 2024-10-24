@@ -1,6 +1,5 @@
 "use client";
-import { deleteParent, forceDeleteParent, restoreParent } from "@/actions/parents";
-import { ParentsFormModal } from "@/components/ParentsFormModal";
+import { deleteStudent, forceDeleteStudent, restoreStudent } from "@/actions/students";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -13,53 +12,52 @@ import {
 import { Prisma } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-type ParentsTableType = {
-  parents: Prisma.ParentGetPayload<{ include: { user: true } }>[];
-};
-export default function ParentsTable({ parents }: ParentsTableType) {
+import { EditStudentFormModal } from "../formModals/edit/EditStudentFormModal";
+
+export default function StudentsTable({
+  students,
+}: {
+  students: Prisma.StudentGetPayload<{ include: { grade: true } }>[];
+}) {
   const router = useRouter();
   const handleDelete = async (id: number, forceDelete: boolean = false) => {
     toast.info("Cuenta eliminada!");
     if (forceDelete) {
-      await forceDeleteParent(id);
+      await forceDeleteStudent(id);
     } else {
-      await deleteParent(id);
+      await deleteStudent(id);
     }
     router.refresh();
   };
   const handleRestore = async (id: number) => {
     toast.info("Cuenta restaurada!");
-    await restoreParent(id);
+    await restoreStudent(id);
     router.refresh();
   };
   return (
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>ID</TableHead>
-          <TableHead>Padre</TableHead>
-          <TableHead>Madre</TableHead>
-          <TableHead>Usuario</TableHead>
+          <TableHead>Nombre</TableHead>
+          <TableHead>Grado</TableHead>
           <TableHead>Acciones</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {parents?.map((parent) => (
-          <TableRow key={parent.id}>
-            <TableCell>{parent.id}</TableCell>
-            <TableCell>{parent.fatherName}</TableCell>
-            <TableCell>{parent.motherName}</TableCell>
-            <TableCell>{parent.user.username}</TableCell>
+        {students?.map((student) => (
+          <TableRow key={student.id}>
+            <TableCell>{student.name}</TableCell>
+            <TableCell>{student.grade.name}</TableCell>
             <TableCell>
               <div className="flex gap-2">
-                <ParentsFormModal mode="edit" parentToEdit={parent} />
-                {parent.deleteAt !== null ? (
+                <EditStudentFormModal studentToEdit={student} />
+                {student.deleteAt !== null ? (
                   <>
-                    <Button onClick={() => handleRestore(parent.id)} size="sm" variant="outline">
+                    <Button onClick={() => handleRestore(student.id)} size="sm" variant="outline">
                       Restaurar
                     </Button>
                     <Button
-                      onClick={() => handleDelete(parent.id, true)}
+                      onClick={() => handleDelete(student.id, true)}
                       size="sm"
                       variant="destructive"
                     >
@@ -67,8 +65,8 @@ export default function ParentsTable({ parents }: ParentsTableType) {
                     </Button>
                   </>
                 ) : (
-                  <Button onClick={() => handleDelete(parent.id)} size="sm" variant="destructive">
-                    Eliminar
+                  <Button onClick={() => handleDelete(student.id)} size="sm" variant="destructive">
+                    Deshabilitar
                   </Button>
                 )}
               </div>

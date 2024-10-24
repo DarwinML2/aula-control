@@ -1,6 +1,6 @@
 import { getAllGradesWithTrash } from "@/actions/grades";
 import { GradesFormModal } from "@/components/GradesFormModal";
-import GradesTable from "./_components/GradesTable";
+import { GradesTable } from "@/components/tables/GradesTable";
 
 export default async function Page() {
   const grades = await getAllGradesWithTrash();

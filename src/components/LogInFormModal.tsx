@@ -1,8 +1,9 @@
 "use client";
 
-import { signInUser } from "@/actions/users";
+import { getUser, signInUser } from "@/actions/users";
 import { CustomFormField, FormFieldType } from "@/components/CustomFormField";
 import { Button } from "@/components/ui/button";
+import { RoleEnum } from "@/enums";
 import { signInSchema } from "@/lib/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -31,7 +32,15 @@ export function LogInFormModal() {
   async function onSubmit(values: z.infer<typeof signInSchema>) {
     const result = await signInUser(values.email, values.password);
     if (result) {
-      router.push("/admin");
+      const user = await getUser({ username: values.email });
+      if (!user) return;
+      if (user.roleId === RoleEnum.ADMIN) {
+        router.push("/admin");
+      } else if (user.roleId === RoleEnum.TEACHER) {
+        router.push("/teachers");
+      } else if (user.roleId === RoleEnum.PARENT) {
+        router.push("/parents");
+      }
     } else {
       toast.error("Error al iniciar sesion");
     }
@@ -53,7 +62,7 @@ export function LogInFormModal() {
                 control={form.control}
                 fieldType={FormFieldType.INPUT}
                 label="Correo electronico"
-                type="email"
+                // type="email"
                 name="email"
               />
               <CustomFormField

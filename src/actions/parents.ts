@@ -2,18 +2,40 @@
 
 import { Prisma } from "@prisma/client";
 
+import { getYear } from "@/actions/school";
 import { RoleEnum } from "@/enums";
 import { deleteAtDatetime } from "@/lib/utils";
 import prisma from "../../prisma/db";
-import { getYear } from "./school";
-type ParentCreate = Prisma.Args<typeof prisma.parent, "create">["data"];
 type ParentSelect = Prisma.Args<typeof prisma.parent, "findFirst">["where"];
 
+export async function getParentById(id: number) {
+  try {
+    const parent = await prisma.parent.findUnique({
+      where: { id },
+      include: { user: true, students: { include: { grade: true } } },
+    });
+    return parent;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function getParentByUserId(id: number) {
+  try {
+    const parent = await prisma.parent.findFirst({
+      where: { user: { id } },
+      include: { user: true, students: { include: { grade: true } } },
+    });
+    return parent;
+  } catch (error) {
+    console.log(error);
+  }
+}
 export async function getAllParents(where?: ParentSelect) {
   const year = await getYear();
   if (!year) return false;
   try {
-    const parents = prisma.parent.findMany({
+    const parents = await prisma.parent.findMany({
       where: { year, deleteAt: null, ...where },
       include: { user: true },
     });
@@ -22,17 +44,18 @@ export async function getAllParents(where?: ParentSelect) {
     console.log(error);
   }
 }
-export async function getAllParentsWithTrash(where?: ParentSelect) {
+export async function getAllParentsWithTrash({ where }: { where?: ParentSelect } = {}) {
   const year = await getYear();
-  if (!year) return false;
+  if (!year) return [];
   try {
-    const parents = prisma.parent.findMany({
+    const parents = await prisma.parent.findMany({
       where: { year, ...where },
-      include: { user: true },
+      include: { user: true, students: true },
     });
     return parents;
   } catch (error) {
     console.log(error);
+    return [];
   }
 }
 type Parent = {
@@ -63,7 +86,7 @@ export async function createParent({
   const year = await getYear();
   if (!year) return false;
   try {
-    const parent = prisma.parent.create({
+    const parent = await prisma.parent.create({
       data: {
         fatherName,
         fatherEmail,
@@ -114,7 +137,7 @@ export async function editParent({
     if (password) {
       userData.password = password;
     }
-    const parent = prisma.parent.update({
+    const parent = await prisma.parent.update({
       where: { id },
       data: {
         fatherName,

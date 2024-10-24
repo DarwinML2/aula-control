@@ -13,9 +13,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-generator dbml {
-  provider = "prisma-dbml-generator"
-}
+// generator dbml {
+//   provider = "prisma-dbml-generator"
+// }
 
 model School {
   id       Int    @id @default(autoincrement())
@@ -34,7 +34,6 @@ model User {
 
   Parent  Parent[]
   Teacher Teacher[]
-  Student Student[]
 
   @@map("users")
 }
@@ -115,8 +114,6 @@ model Student {
   phone      String       @unique @db.VarChar(15)
   email      String       @unique @db.VarChar(200)
   dob        DateTime     @db.Date()
-  userId     Int
-  user       User         @relation(fields: [userId], references: [id])
   parentId   Int
   parent     Parent       @relation(fields: [parentId], references: [id])
   gradeId    Int
@@ -132,17 +129,18 @@ model Student {
 }
 
 model Course {
-  id        Int       @id @default(autoincrement())
-  gradeId   Int
-  grade     Grade     @relation(fields: [gradeId], references: [id])
-  subjectId Int
-  subject   Subject   @relation(fields: [subjectId], references: [id])
-  teacherId Int
-  teacher   Teacher   @relation(fields: [teacherId], references: [id])
-  day       String    @db.Char(1)
-  time      DateTime  @db.Time()
-  year      String    @db.Char(5)
-  deleteAt  DateTime?
+  id         Int          @id @default(autoincrement())
+  gradeId    Int
+  grade      Grade        @relation(fields: [gradeId], references: [id])
+  subjectId  Int
+  subject    Subject      @relation(fields: [subjectId], references: [id])
+  teacherId  Int
+  teacher    Teacher      @relation(fields: [teacherId], references: [id])
+  day        String       @db.VarChar(10)
+  time       DateTime     @db.Time()
+  year       String       @db.Char(5)
+  deleteAt   DateTime?
+  Attendance Attendance[]
 
   @@map("courses")
 }
@@ -187,6 +185,8 @@ model Attendance {
   id                 Int              @id @default(autoincrement())
   studentId          Int
   student            Student          @relation(fields: [studentId], references: [id])
+  courseId           Int
+  course             Course           @relation(fields: [courseId], references: [id])
   date               DateTime         @db.Date()
   attendanceOptionId String           @db.Char(2)
   attendanceOption   AttendanceOption @relation(fields: [attendanceOptionId], references: [name])
@@ -212,12 +212,14 @@ model Report {
   description String   @db.Text
   date        DateTime @db.Date()
   year        String   @db.Char(5)
+
+  @@index([studentId, date, year])
 }
 
 model Post {
   id          Int       @id @default(autoincrement())
   title       String    @db.VarChar(150)
-  description String    @db.VarChar(200)
+  description String    @db.Text
   teacherId   Int
   teacher     Teacher   @relation(fields: [teacherId], references: [id])
   gradeId     String

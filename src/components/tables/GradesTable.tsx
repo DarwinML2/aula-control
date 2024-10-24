@@ -14,7 +14,7 @@ import { Grade } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-export default function GradesTable({ grades }: { grades: Grade[] }) {
+export function GradesTable({ grades }: { grades: Grade[] }) {
   const router = useRouter();
   const handleDeleteGrade = async (id: number, forceDelete: boolean = false) => {
     toast.info("Grado eliminado!");
@@ -74,7 +74,7 @@ export default function GradesTable({ grades }: { grades: Grade[] }) {
                     size="sm"
                     variant="destructive"
                   >
-                    Eliminar
+                    Deshabilitar
                   </Button>
                 )}
               </div>
